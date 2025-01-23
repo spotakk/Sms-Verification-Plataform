@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMS Verification Platform</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+        main {
+            padding: 2rem;
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .number {
+            border: 1px solid #ccc;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>SMS Verification Platform</h1>
+    </header>
+    <main>
+        <section id="numbers">
+            <h2>Available Numbers</h2>
+            <div id="number-list"></div>
+        </section>
+
+        <section id="messages" style="display: none;">
+            <h2>Messages for <span id="selected-number"></span></h2>
+            <div id="message-list"></div>
+            <button onclick="loadNumbers()">Back to Numbers</button>
+        </section>
+    </main>
+
+    <script>
+        const apiUrl = 'http://localhost:5000'; // Backend URL
+
+        async function loadNumbers() {
+            document.getElementById('messages').style.display = 'none';
+            document.getElementById('numbers').style.display = 'block';
+
+            const response = await fetch(`${apiUrl}/available_numbers`);
+            const data = await response.json();
+
+            const numberList = document.getElementById('number-list');
+            numberList.innerHTML = '';
+
+            data.numbers.forEach(number => {
+                const div = document.createElement('div');
+                div.classList.add('number');
+                div.innerHTML = `
+                    <p>Number: ${number}</p>
+                    <button onclick="viewMessages('${number}')">View Messages</button>
+                `;
+                numberList.appendChild(div);
+            });
+        }
+
+        async function viewMessages(number) {
+            document.getElementById('numbers').style.display = 'none';
+            document.getElementById('messages').style.display = 'block';
+            document.getElementById('selected-number').textContent = number;
+
+            const response = await fetch(`${apiUrl}/messages/${number}`);
+            const data = await response.json();
+
+            const messageList = document.getElementById('message-list');
+            messageList.innerHTML = '';
+
+            data.messages.forEach(msg => {
+                const div = document.createElement('div');
+                div.classList.add('number');
+                div.innerHTML = `
+                    <p><strong>From:</strong> ${msg.from}</p>
+                    <p><strong>Message:</strong> ${msg.body}</p>
+                `;
+                messageList.appendChild(div);
+            });
+        }
+
+        // Load numbers on page load
+        loadNumbers();
+    </script>
+</body>
+</html>
